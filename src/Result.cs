@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 namespace Boring
 {
     // From https://github.com/vkhorikov/CSharpFunctionalExtensions
+    // Ruined some parts with my own code
     internal class ResultCommonLogic<E>
     {
         public bool IsFailure { get; }
@@ -15,6 +16,9 @@ namespace Boring
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly E _error;
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        private readonly string _errorCode;
 
         public E Error
         {
@@ -28,8 +32,20 @@ namespace Boring
             }
         }
 
+        public string ErrorCode
+        {
+            [DebuggerStepThrough]
+            get
+            {
+                if (IsSuccess)
+                    throw new ResultSuccessException();
+
+                return _errorCode;
+            }
+        }
+
         [DebuggerStepThrough]
-        internal ResultCommonLogic(bool isFailure, E error)
+        internal ResultCommonLogic(bool isFailure, E error, string errorCode)
         {
             if (isFailure)
             {
@@ -43,7 +59,9 @@ namespace Boring
             }
 
             IsFailure = isFailure;
+
             _error = error;
+            _errorCode = errorCode;
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)
@@ -53,6 +71,7 @@ namespace Boring
             if (IsFailure)
             {
                 info.AddValue("Error", Error);
+                info.AddValue("ErrorCode", ErrorCode);
             }
         }
     }
@@ -77,7 +96,7 @@ namespace Boring
         }
 
         [DebuggerStepThrough]
-        public static ResultCommonLogic Create(bool isFailure, string error, int errorCode)
+        public static ResultCommonLogic Create(bool isFailure, string error, string errorCode)
         {
             if (isFailure)
             {
@@ -93,12 +112,9 @@ namespace Boring
             return new ResultCommonLogic(isFailure, error, errorCode);
         }
 
-        private ResultCommonLogic(bool isFailure, string error, int errorCode = 0) : base(isFailure, error)
+        private ResultCommonLogic(bool isFailure, string error, string errorCode = "") : base(isFailure, error, errorCode)
         {
-            ErrorCode = errorCode;
         }
-
-        public int ErrorCode { get; }
     }
 
     internal static class ResultMessages
@@ -138,7 +154,7 @@ namespace Boring
         public bool IsSuccess => _logic.IsSuccess;
         public string Error => _logic.Error;
 
-        public int ErrorCode => _logic.ErrorCode;
+        public string ErrorCode => _logic.ErrorCode;
 
         [DebuggerStepThrough]
         private Result(bool isFailure, string error)
@@ -146,7 +162,7 @@ namespace Boring
             _logic = ResultCommonLogic.Create(isFailure, error);
         }
 
-        private Result(bool isFailure, string error, int errorCode)
+        private Result(bool isFailure, string error, string errorCode)
         {
             _logic = ResultCommonLogic.Create(isFailure, error, errorCode);
         }
@@ -172,7 +188,7 @@ namespace Boring
         }
 
         [DebuggerStepThrough]
-        public static Result Fail(string error, int errorCode)
+        public static Result Fail(string error, string errorCode)
         {
             return new Result(true, error, errorCode);
         }
@@ -209,7 +225,7 @@ namespace Boring
         }
 
         [DebuggerStepThrough]
-        public static Result<T> Fail<T>(string error, int errorCode)
+        public static Result<T> Fail<T>(string error, string errorCode)
         {
             return new Result<T>(true, default(T), error, errorCode);
         }
@@ -221,7 +237,7 @@ namespace Boring
                 : Fail<T>(error);
         }
 
-        public static Result<T> Create<T>(bool isSuccess, T value, string error, int errorCode)
+        public static Result<T> Create<T>(bool isSuccess, T value, string error, string errorCode)
         {
             return isSuccess
                 ? Ok(value)
@@ -462,7 +478,7 @@ namespace Boring
         }
 
         [DebuggerStepThrough]
-        internal Result(bool isFailure, T value, string error, int errorCode)
+        internal Result(bool isFailure, T value, string error, string errorCode)
         {
             _logic = ResultCommonLogic.Create(isFailure, error, errorCode);
             _value = value;
@@ -558,7 +574,14 @@ namespace Boring
         [DebuggerStepThrough]
         internal Result(bool isFailure, T value, E error)
         {
-            _logic = new ResultCommonLogic<E>(isFailure, error);
+            _logic = new ResultCommonLogic<E>(isFailure, error, "");
+            _value = value;
+        }
+
+        [DebuggerStepThrough]
+        internal Result(bool isFailure, T value, E error, string errorCode)
+        {
+            _logic = new ResultCommonLogic<E>(isFailure, error, errorCode);
             _value = value;
         }
 
@@ -568,19 +591,22 @@ namespace Boring
 
             T value;
             E error;
+            string errorCode;
 
             if (isFailure)
             {
                 value = default(T);
                 error = (E)info.GetValue("Error", typeof(E));
+                errorCode = (string)info.GetValue("ErrorCode", typeof(string));
             }
             else
             {
                 value = (T)info.GetValue("Value", typeof(T));
                 error = default(E);
+                errorCode = "";
             }
 
-            _logic = new ResultCommonLogic<E>(isFailure, error);
+            _logic = new ResultCommonLogic<E>(isFailure, error, errorCode);
             _value = value;
         }
 
