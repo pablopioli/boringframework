@@ -76,9 +76,29 @@ namespace Boring
             return new ResultCommonLogic(isFailure, error);
         }
 
-        private ResultCommonLogic(bool isFailure, string error) : base(isFailure, error)
+        [DebuggerStepThrough]
+        public static ResultCommonLogic Create(bool isFailure, string error, int errorCode)
         {
+            if (isFailure)
+            {
+                if (string.IsNullOrEmpty(error))
+                    throw new ArgumentNullException(nameof(error), ResultMessages.ErrorMessageIsNotProvidedForFailure);
+            }
+            else
+            {
+                if (error != null)
+                    throw new ArgumentException(ResultMessages.ErrorMessageIsProvidedForSuccess, nameof(error));
+            }
+
+            return new ResultCommonLogic(isFailure, error, errorCode);
         }
+
+        private ResultCommonLogic(bool isFailure, string error, int errorCode = 0) : base(isFailure, error)
+        {
+            ErrorCode = errorCode;
+        }
+
+        public int ErrorCode { get; }
     }
 
     internal static class ResultMessages
@@ -118,10 +138,17 @@ namespace Boring
         public bool IsSuccess => _logic.IsSuccess;
         public string Error => _logic.Error;
 
+        public int ErrorCode => _logic.ErrorCode;
+
         [DebuggerStepThrough]
         private Result(bool isFailure, string error)
         {
             _logic = ResultCommonLogic.Create(isFailure, error);
+        }
+
+        private Result(bool isFailure, string error, int errorCode)
+        {
+            _logic = ResultCommonLogic.Create(isFailure, error, errorCode);
         }
 
         Result(SerializationInfo info, StreamingContext context)
@@ -142,6 +169,12 @@ namespace Boring
         public static Result Fail(string error)
         {
             return new Result(true, error);
+        }
+
+        [DebuggerStepThrough]
+        public static Result Fail(string error, int errorCode)
+        {
+            return new Result(true, error, errorCode);
         }
 
         [DebuggerStepThrough]
