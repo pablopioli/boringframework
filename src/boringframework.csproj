@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;net461;</TargetFrameworks>
     <RootNamespace>Boring</RootNamespace>
     <AssemblyName>Boring</AssemblyName>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -10,9 +10,9 @@
     <Product>The Boring Framework</Product>
     <Company />
     <RepositoryUrl>https://github.com/pablopioli/boringframework</RepositoryUrl>
-    <AssemblyVersion>1.0.0.0</AssemblyVersion>
-    <FileVersion>1.0.0.0</FileVersion>
-    <Version>1.0.0</Version>
+    <AssemblyVersion>1.1.0.0</AssemblyVersion>
+    <FileVersion>1.1.0.0</FileVersion>
+    <Version>1.1.0</Version>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 

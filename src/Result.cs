@@ -208,11 +208,24 @@ namespace Boring
             return new Result<T>(true, default(T), error);
         }
 
+        [DebuggerStepThrough]
+        public static Result<T> Fail<T>(string error, int errorCode)
+        {
+            return new Result<T>(true, default(T), error, errorCode);
+        }
+
         public static Result<T> Create<T>(bool isSuccess, T value, string error)
         {
             return isSuccess
                 ? Ok(value)
                 : Fail<T>(error);
+        }
+
+        public static Result<T> Create<T>(bool isSuccess, T value, string error, int errorCode)
+        {
+            return isSuccess
+                ? Ok(value)
+                : Fail<T>(error, errorCode);
         }
 
         public static Result<T> Create<T>(Func<bool> predicate, T value, string error)
@@ -445,6 +458,13 @@ namespace Boring
         internal Result(bool isFailure, T value, string error)
         {
             _logic = ResultCommonLogic.Create(isFailure, error);
+            _value = value;
+        }
+
+        [DebuggerStepThrough]
+        internal Result(bool isFailure, T value, string error, int errorCode)
+        {
+            _logic = ResultCommonLogic.Create(isFailure, error, errorCode);
             _value = value;
         }
 
