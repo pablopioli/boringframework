@@ -444,6 +444,7 @@ namespace Boring
         public bool IsFailure => _logic.IsFailure;
         public bool IsSuccess => _logic.IsSuccess;
         public string Error => _logic.Error;
+        public string ErrorCode => _logic.ErrorCode;
 
         void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
         {
