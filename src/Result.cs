@@ -83,7 +83,7 @@ namespace Boring
         {
             if (isFailure)
             {
-                if (string.IsNullOrEmpty(error))
+                if (error == null)
                     throw new ArgumentNullException(nameof(error), ResultMessages.ErrorMessageIsNotProvidedForFailure);
             }
             else
@@ -100,7 +100,7 @@ namespace Boring
         {
             if (isFailure)
             {
-                if (string.IsNullOrEmpty(error))
+                if (error == null)
                     throw new ArgumentNullException(nameof(error), ResultMessages.ErrorMessageIsNotProvidedForFailure);
             }
             else
