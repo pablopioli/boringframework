@@ -1,5 +1,5 @@
-﻿// From https://raw.githubusercontent.com/Burtsev-Alexey/net-object-deep-copy/master/ObjectExtensions.cs
-using System.ArrayExtensions;
+﻿// Parts from https://raw.githubusercontent.com/Burtsev-Alexey/net-object-deep-copy/master/ObjectExtensions.cs
+// Parts from https://devblogs.microsoft.com/oldnewthing/20191227-00/?p=103271
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -7,6 +7,9 @@ namespace System
 {
     public static class ObjectExtensions
     {
+        public static T CastTo<T>(this object o) => (T)o;
+        public static T As<T>(this object o) where T : class => o as T;
+
         private static readonly MethodInfo CloneMethod = typeof(Object).GetMethod("MemberwiseClone", BindingFlags.NonPublic | BindingFlags.Instance);
 
         private static bool IsPrimitive(Type type)
@@ -84,50 +87,47 @@ namespace System
         }
     }
 
-    namespace ArrayExtensions
+    public static class ArrayExtensions
     {
-        public static class ArrayExtensions
+        public static void ForEach(this Array array, Action<Array, int[]> action)
         {
-            public static void ForEach(this Array array, Action<Array, int[]> action)
+            if (array.LongLength == 0) return;
+            ArrayTraverse walker = new ArrayTraverse(array);
+            do action(array, walker.Position);
+            while (walker.Step());
+        }
+    }
+
+    internal class ArrayTraverse
+    {
+        public int[] Position;
+        private int[] maxLengths;
+
+        public ArrayTraverse(Array array)
+        {
+            maxLengths = new int[array.Rank];
+            for (int i = 0; i < array.Rank; ++i)
             {
-                if (array.LongLength == 0) return;
-                ArrayTraverse walker = new ArrayTraverse(array);
-                do action(array, walker.Position);
-                while (walker.Step());
+                maxLengths[i] = array.GetLength(i) - 1;
             }
+            Position = new int[array.Rank];
         }
 
-        internal class ArrayTraverse
+        public bool Step()
         {
-            public int[] Position;
-            private int[] maxLengths;
-
-            public ArrayTraverse(Array array)
+            for (int i = 0; i < Position.Length; ++i)
             {
-                maxLengths = new int[array.Rank];
-                for (int i = 0; i < array.Rank; ++i)
+                if (Position[i] < maxLengths[i])
                 {
-                    maxLengths[i] = array.GetLength(i) - 1;
-                }
-                Position = new int[array.Rank];
-            }
-
-            public bool Step()
-            {
-                for (int i = 0; i < Position.Length; ++i)
-                {
-                    if (Position[i] < maxLengths[i])
+                    Position[i]++;
+                    for (int j = 0; j < i; j++)
                     {
-                        Position[i]++;
-                        for (int j = 0; j < i; j++)
-                        {
-                            Position[j] = 0;
-                        }
-                        return true;
+                        Position[j] = 0;
                     }
+                    return true;
                 }
-                return false;
             }
+            return false;
         }
     }
 }
