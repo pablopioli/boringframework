@@ -89,6 +89,13 @@ namespace Boring
         }
 
         /// <summary>
+        /// Initializes a new instance of a <see cref="Date"/> structure to a specified number of days.
+        /// </summary>
+        /// <param name="dateTime">A DateTime representing the date.</param>
+        public Date(DateTime dateTime) : this(dateTime.Year, dateTime.Month, dateTime.Day)
+        { }
+
+        /// <summary>
         /// Initializes a new instance of a <see cref="Date"/> structure to a specified year, month, and day.
         /// </summary>
         /// <param name="year">The year (1 through 9999).</param>
@@ -1580,8 +1587,7 @@ namespace Boring
                 if (day <= days[month] - days[month - 1])
                 {
                     int y = year - 1;
-                    int n = y * 365 + y / 4 - y / 100 + y / 400 + days[month - 1] + day - 1;
-                    return n;
+                    return y * 365 + y / 4 - y / 100 + y / 400 + days[month - 1] + day - 1;
                 }
             }
 
