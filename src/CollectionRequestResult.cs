@@ -5,6 +5,8 @@ namespace Boring
     public class CollectionRequestResult<T>
     {
         public bool IsFailure => TextError.IsNotNullOrEmpty() || HttpError != null;
+        public bool IsHttpError => HttpError != null;
+
         public string TextError { get; set; }
         public HttpError HttpError { get; set; }
         public ICollection<T> Value { get; set; }
