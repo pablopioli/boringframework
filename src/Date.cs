@@ -994,18 +994,50 @@ namespace Boring
         /// <summary>
         /// Converts the string representation of a date to its <see cref="Date"/> equivalent.
         /// </summary>
-        /// <param name="s">A string that contains a date to convert.</param>
+        /// <param name="dateToParse">A string that contains a date to convert.</param>
         /// <returns>An object that is equivalent to the date contained in <paramref name="s"/>.</returns>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="s"/> is <c>null</c>.
+        /// <paramref name="dateToParse"/> is <c>null</c>.
         /// </exception>
         /// <exception cref="FormatException">
-        /// <paramref name="s"/> does not contain a valid string representation of a date.
+        /// <paramref name="dateToParse"/> does not contain a valid string representation of a date.
         /// </exception>
-        public static Date Parse(string s)
+        public static Date Parse(string dateToParse)
         {
-            DateTime dt = DateTime.Parse(s);
-            return DateFromDateTime(dt);
+            if (string.IsNullOrEmpty(dateToParse))
+            {
+                return MinValue;
+            }
+
+            var formats = new string[] {
+                "yyyy-MM-dd",
+                "yyyyMMdd",
+                "yyyyMMddTHHmmssZ",
+                "yyyyMMddTHHmmZ",
+                "yyyyMMddTHHmmss",
+                "yyyyMMddTHHmm",
+                "yyyyMMddHHmmss",
+                "yyyyMMddHHmm",
+                "yyyy-MM-ddTHH-mm-ss",
+                "yyyy-MM-dd-HH-mm-ss",
+                "yyyy-MM-dd-HH-mm"
+            };
+
+            foreach (var format in formats)
+            {
+                if (format.EndsWith("Z") && DateTime.TryParseExact(dateToParse, format, null,
+                             DateTimeStyles.AssumeUniversal, out DateTime dateAsDateTime))
+                {
+                    return new Date(dateAsDateTime.Year, dateAsDateTime.Month, dateAsDateTime.Day);
+                }
+
+                if (DateTime.TryParseExact(dateToParse, format, null, DateTimeStyles.None, out dateAsDateTime))
+                {
+                    return new Date(dateAsDateTime.Year, dateAsDateTime.Month, dateAsDateTime.Day);
+                }
+            }
+
+            throw new Exception("Invalid date, please use YYYY-MM-DD format");
         }
 
         /// <summary>
