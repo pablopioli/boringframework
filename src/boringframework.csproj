@@ -10,9 +10,9 @@
     <Product>The Boring Framework</Product>
     <Company />
     <RepositoryUrl>https://github.com/pablopioli/boringframework</RepositoryUrl>
-    <AssemblyVersion>1.10.1.0</AssemblyVersion>
-    <FileVersion>1.10.1.0</FileVersion>
-    <Version>1.10.1</Version>
+    <AssemblyVersion>1.11.0.0</AssemblyVersion>
+    <FileVersion>1.11.0.0</FileVersion>
+    <Version>1.11</Version>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
